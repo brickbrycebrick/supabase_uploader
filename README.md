@@ -5,6 +5,7 @@ A CLI tool that helps beginners load data from CSV/XLSX files into Supabase. It 
 ## Features
 
 - Supports both CSV and XLSX file formats
+- Handles multi-sheet Excel files with options to process specific sheets
 - Automatically determines column data types and maps them to PostgreSQL types
 - Generates SQL scripts for table creation (saved to `sql_scripts` folder by default)
 - Uploads data to Supabase with proper error handling
@@ -61,19 +62,26 @@ python upload_to_supabase.py path/to/your/file.csv --generate-sql --upload
 ### Advanced Options
 
 ```bash
-# Specify a custom table name
-python upload_to_supabase.py path/to/your/file.csv --generate-sql --upload --table-name custom_table_name
-
 # Specify a custom output path for the SQL script
 python upload_to_supabase.py path/to/your/file.csv --generate-sql --sql-output path/to/output.sql
 
 # Use insert-only mode instead of overwrite (default is overwrite which replaces all existing data)
 python upload_to_supabase.py path/to/your/file.csv --upload --insert-only
+
+# List all available sheets in an Excel file
+python upload_to_supabase.py path/to/your/file.xlsx --list-sheets
+
+# Process a specific sheet from an Excel file
+python upload_to_supabase.py path/to/your/file.xlsx --generate-sql --upload --sheet "Sheet1"
 ```
 
 ## Notes
 
-- The table name will be derived from the file name (with spaces replaced by underscores and special characters removed) unless specified with `--table-name`
+- The table name will be derived from the file name (with spaces replaced by underscores and special characters removed)
+- For multi-sheet Excel files:
+  - By default, all sheets will be processed with table names as `filename_sheetname`
+  - Use `--sheet "Sheet Name"` to process only a specific sheet
+  - Use `--list-sheets` to see all available sheets in an Excel file
 - The generated SQL script will include a `DROP TABLE IF EXISTS` statement to ensure a clean slate
 - SQL scripts are saved to the `sql_scripts` folder by default
 - When uploading data, make sure the table already exists in Supabase with the correct schema
@@ -98,6 +106,22 @@ This will generate an `sql_scripts/employees.sql` file with SQL commands to crea
 
 ```bash
 python upload_to_supabase.py data/employees.xlsx --upload
+```
+
+### Working with Multi-Sheet Excel Files
+
+```bash
+# List all sheets in an Excel file
+python upload_to_supabase.py data/quarterly_reports.xlsx --list-sheets
+
+# Generate SQL for a specific sheet
+python upload_to_supabase.py data/quarterly_reports.xlsx --generate-sql --sheet "Q1 2023"
+
+# Upload data from a specific sheet
+python upload_to_supabase.py data/quarterly_reports.xlsx --upload --sheet "Q1 2023"
+
+# Generate SQL and upload data from a specific sheet
+python upload_to_supabase.py data/quarterly_reports.xlsx --generate-sql --upload --sheet "Q1 2023"
 ```
 
 This will upload the data from the Excel file to a table named `employees` in your Supabase project, replacing any existing data.
